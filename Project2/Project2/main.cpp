@@ -76,6 +76,7 @@ float moveX = 0.0f, moveY = 0.0f;
 float moveSpeed = 14.0f;
 float angleNow = 0.0f;
 float moveAngle = 0.0f;
+float moveAngleSpeed = 2.0f;
 float scaleX = 1.0f, scaleY = 1.0f;
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
@@ -229,46 +230,23 @@ void Update(void) {
 	SpriteAnim_Update();
 	Keyboard_Update();
 
-}
-
-void Draw(void) {
-	//画面のクリア,           　　　　 クリアしたいターゲット　　　　　　　　　　色　　　　　　　　　　　　　Z　　ステンシル
-	myDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_RGBA(152, 251, 152, 255), 1.0f, 0);
-
-	//ポリゴン描画 1.頂点構造体を作ります　2.デバイスに頂点の形を伝えるためのFVFを宣言する
-	//3.頂点データを作る　
-	//4.ポリゴン描画命令, ※BeginScene~EndScene間に書く
-	myDevice->BeginScene();	//BeginScene後一定要接EndScene
-	myDevice->SetFVF(FVF_VERTEX2D);
-
-	//DrawPrimitiveUPの引数　=>　図形の描くタイプ　　数　　頂点データ先頭アドレス　　頂点1個分のサイズ
-
-	//Sprite_Draw(0, 256, 256);
-	Sprite_Draw(1, nowX, nowY, nowX, nowY, angleNow, scaleX, scaleY, 1.0f);
-	//Sprite_Draw(2, 768, 256, 0, 0, 64, 64, 768, 256, angle);
-	//Sprite_Draw(0, 256, 512, 100, 100, 100, 100);
-
 	if (Keyboard_IsPress(DIK_W)) {		//Move Up
 		moveY -= moveSpeed;
 	}
 	if (Keyboard_IsPress(DIK_A)) {		//Move Left
-		//nowX--;
 		moveX -= moveSpeed;
 	}
 	if (Keyboard_IsPress(DIK_S)) {		//Move Down
 		moveY += moveSpeed;
 	}
 	if (Keyboard_IsPress(DIK_D)) {		//Move Right
-		//nowX++;
 		moveX += moveSpeed;
 	}
 	if (Keyboard_IsPress(DIK_Q)) {		//Rotate Left
-		//angleNow -= 0.02f;
-		moveAngle -= 2.0f;
+		moveAngle -= moveAngleSpeed;
 	}
 	if (Keyboard_IsPress(DIK_E)) {		//Rotate Right
-		//angleNow += 0.02f;
-		moveAngle += 2.0f;
+		moveAngle += moveAngleSpeed;
 	}
 	if (Keyboard_IsPress(DIK_Z)) {		//Scale Up
 		scaleX += 0.01f;
@@ -288,6 +266,24 @@ void Draw(void) {
 	nowX += moveX;
 	nowY += moveY;
 	angleNow += moveAngle;
+}
+
+void Draw(void) {
+	//画面のクリア,           　　　　 クリアしたいターゲット　　　　　　　　　　色　　　　　　　　　　　　　Z　　ステンシル
+	myDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_RGBA(152, 251, 152, 255), 1.0f, 0);
+
+	//ポリゴン描画 1.頂点構造体を作ります　2.デバイスに頂点の形を伝えるためのFVFを宣言する
+	//3.頂点データを作る　
+	//4.ポリゴン描画命令, ※BeginScene~EndScene間に書く
+	myDevice->BeginScene();	//BeginScene後一定要接EndScene
+	myDevice->SetFVF(FVF_VERTEX2D);
+
+	//DrawPrimitiveUPの引数　=>　図形の描くタイプ　　数　　頂点データ先頭アドレス　　頂点1個分のサイズ
+
+	Sprite_Draw(0, 256, 256);
+	Sprite_Draw(1, nowX, nowY, nowX, nowY, angleNow, scaleX, scaleY, 1.0f);
+	//Sprite_Draw(2, 768, 256, 0, 0, 64, 64, 768, 256, angle);
+	//Sprite_Draw(0, 256, 512, 100, 100, 100, 100);
 
 	/*myDevice->SetTexture(0, g_pTexture);
 	myDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, v, sizeof(Vertex2d));

@@ -2,6 +2,9 @@
 #ifndef SPRITE_H
 #define SPRITE_H
 
+void Sprite_Init();
+void Sprite_Uninit();
+
 void Sprite_Draw(int textureID, float dx, float dy);
 void Sprite_Draw(int textureID, float dx, float dy, float centerX, float centerY, float angle, float scaleX, float scaleY, float scaleZ);
 

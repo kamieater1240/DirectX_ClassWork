@@ -1,4 +1,4 @@
-#include <Windows.h>
+ï»¿#include <Windows.h>
 #include <d3d9.h>
 #include <d3dx9.h>
 #include "sprite.h"
@@ -6,11 +6,26 @@
 #include "mydirect3d.h"
 #include "main.h"
 
+static LPDIRECT3DVERTEXBUFFER9 g_VertexBuffer = nullptr;
 static D3DCOLOR g_Color = D3DCOLOR_RGBA(255, 255, 255, 255);
+
+void Sprite_Init() {
+	LPDIRECT3DDEVICE9 pDevice = MyDirect3D_GetDevice();
+	//Video Ramã«ç©ºé–“ã‚’ç¢ºä¿ã—ã¦
+	pDevice->CreateVertexBuffer(sizeof(Vertex2d)*4, D3DUSAGE_WRITEONLY, FVF_VERTEX2D, D3DPOOL_MANAGED, &g_VertexBuffer, NULL);
+}
+
+void Sprite_Uninit() {
+	if (g_VertexBuffer) {
+		g_VertexBuffer->Release();
+		g_VertexBuffer = nullptr;
+	}
+}
 
 void Sprite_Draw(int textureID, float dx, float dy) {
 	int width = Texture_GetWidth(textureID);
 	int height = Texture_GetHeight(textureID);
+	LPDIRECT3DDEVICE9 pDevice = MyDirect3D_GetDevice();
 
 	Vertex2d v[] = {
 		{D3DXVECTOR4(dx - width / 2, dy - height / 2, 0.0f, 1.0f), g_Color, D3DXVECTOR2(0.0f, 0.0f)},
@@ -18,12 +33,36 @@ void Sprite_Draw(int textureID, float dx, float dy) {
 		{D3DXVECTOR4(dx - width / 2, dy + height / 2, 0.0f, 1.0f), g_Color, D3DXVECTOR2(0.0f, 1.0f)},
 		{D3DXVECTOR4(dx + width / 2, dy + height / 2, 0.0f, 1.0f), g_Color, D3DXVECTOR2(1.0f, 1.0f)},
 	};
+	/*pDevice->SetFVF(FVF_VERTEX2D);
+	pDevice->SetTexture(0, Texture_GetTexture(textureID));
+	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, v, sizeof(Vertex2d));
+	pDevice->SetTexture(0, NULL);*/
 
-	LPDIRECT3DDEVICE9 pDevice = MyDirect3D_GetDevice();
+	//===================================================================//
+	Sprite_Init();
+	Vertex2d* pV;															 //===================================================================//
+	g_VertexBuffer->Lock(0, 0, (void**)&pV, D3DLOCK_DISCARD);				 // VertexBufferåªéœ€è¦è¢«æ‹¬è™ŸåŒ…èµ·ä¾†çš„éƒ¨åˆ†å°±è¡Œäº†                          //
+	memcpy(pV, v, sizeof(v));												 // ç”¨IndexBufferçš„è©±ä¹Ÿéœ€è¦ç”¨åˆ°VertexBuffer                            //
+	g_VertexBuffer->Unlock();												 // IndexBufferå› ç‚ºæœ€å¿«é€šå¸¸ç”¨åœ¨ç•«3Dä¸æœƒå‹•çš„ç‰©ä»¶ä¸Šï¼Œæ¯”å¦‚èªªèƒŒæ™¯             //
+	pDevice->SetStreamSource(0, g_VertexBuffer, 0, sizeof(Vertex2d));		 //===================================================================//
+
+	/*pDevice->SetFVF(FVF_VERTEX2D);
+	pDevice->SetTexture(0, Texture_GetTexture(textureID));
+	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
+	pDevice->SetTexture(0, NULL);*/
+	//===================================================================//
+
+	LPDIRECT3DINDEXBUFFER9 g_pIndexBuffer = NULL;
+	pDevice->CreateIndexBuffer(sizeof(WORD)*6, D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_MANAGED, &g_pIndexBuffer, NULL);
+	WORD* pIndex;
+	g_pIndexBuffer->Lock(0, 0, (void**)&pIndex, D3DLOCK_DISCARD);
+	pIndex[0] = 0; pIndex[1] = 1; pIndex[2] = 2; pIndex[3] = 1; pIndex[4] = 3; pIndex[5] = 2;
+	g_pIndexBuffer->Unlock();
+	pDevice->SetIndices(g_pIndexBuffer);
 
 	pDevice->SetFVF(FVF_VERTEX2D);
 	pDevice->SetTexture(0, Texture_GetTexture(textureID));
-	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, v, sizeof(Vertex2d));
+	pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 4, 0, 2);
 	pDevice->SetTexture(0, NULL);
 }
 
@@ -41,20 +80,20 @@ void Sprite_Draw(int textureID, float dx, float dy, float centerX, float centerY
 
 	LPDIRECT3DDEVICE9 pDevice = MyDirect3D_GetDevice();
 
-	//•Ï”éŒ¾
+	//å¤‰æ•°å®£è¨€
 	D3DXMATRIX mtxR, mtxS, mtxT, mtxIT, mtxW;
-	//•Ï”‚ÉŠÖ”‚ğg—p‚µ‚Ä’l‚ğ‘ã“ü‚·‚é
+	//å¤‰æ•°ã«é–¢æ•°ã‚’ä½¿ç”¨ã—ã¦å€¤ã‚’ä»£å…¥ã™ã‚‹
 	D3DXMatrixRotationZ(&mtxR, angle);
 	D3DXMatrixScaling(&mtxS, scaleX, scaleY, scaleZ);
 
-	//•½ˆÚ‹éw
+	//å¹³ç§»çŸ©é™£
 	D3DXMatrixTranslation(&mtxT, -centerX, -centerY, 0.0f);
 	D3DXMatrixTranslation(&mtxIT, centerX, centerY, 0.0f);
 
 	mtxW = mtxT * mtxR * mtxS * mtxIT;
-	//À•W•ÏŠ·‚·‚é
+	//åº§æ¨™å¤‰æ›ã™ã‚‹
 	//D3DXVec4Transform(&v[0].position, &v[0].position, &mtrxR);
-	//					o—Í				“ü—Í
+	//					å‡ºåŠ›				å…¥åŠ›
 	for (int i = 0; i < 4; i++) {
 		D3DXVec4Transform(&v[i].position, &v[i].position, &mtxW);
 	}
@@ -106,21 +145,21 @@ void Sprite_Draw(int textureID, float dx, float dy, int cut_x, int cut_y, int cu
 
 	LPDIRECT3DDEVICE9 pDevice = MyDirect3D_GetDevice();
 
-	//•Ï”éŒ¾
+	//å¤‰æ•°å®£è¨€
 	D3DXMATRIX mtxR, mtxT, mtxIT, mtxW;
-	//•Ï”‚ÉŠÖ”‚ğg—p‚µ‚Ä’l‚ğ‘ã“ü‚·‚é
+	//å¤‰æ•°ã«é–¢æ•°ã‚’ä½¿ç”¨ã—ã¦å€¤ã‚’ä»£å…¥ã™ã‚‹
 	D3DXMatrixRotationZ(&mtxR, angle);
 
-	//•½ˆÚ‹éw
+	//å¹³ç§»çŸ©é™£
 	D3DXMatrixTranslation(&mtxT, -centerX, -centerY, 0.0f);
 	D3DXMatrixTranslation(&mtxIT, centerX, centerY, 0.0f);
 
-	//Scale MatrixŠÖ”@D3DXMatrixScaling(&mtxS, x scale, y scale, z scale); 1.0 -> •’Ê
+	//Scale Matrixé–¢æ•°ã€€D3DXMatrixScaling(&mtxS, x scale, y scale, z scale); 1.0 -> æ™®é€š
 
 	mtxW = mtxT * mtxR * mtxIT;
-	//À•W•ÏŠ·‚·‚é
+	//åº§æ¨™å¤‰æ›ã™ã‚‹
 	//D3DXVec4Transform(&v[0].position, &v[0].position, &mtrxR);
-	//					o—Í				“ü—Í
+	//					å‡ºåŠ›				å…¥åŠ›
 	for (int i = 0; i < 4; i++) {
 		D3DXVec4Transform(&v[i].position, &v[i].position, &mtxW);
 	}
