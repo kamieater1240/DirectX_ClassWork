@@ -11,6 +11,7 @@ void Texture_Init() {
 	for (int i = 0; i < TEXTUREDATA_MAX; i++) {
 		g_TextureData[i].filename[0] = '\0';
 		g_TextureData[i].pTexture = NULL;
+		g_TextureData[i].id = NULL;
 	}
 }
 
@@ -30,6 +31,7 @@ int Texture_SetLoadFile(const char* pFileName, int width, int height) {
 		strcpy(g_TextureData[i].filename, pFileName);
 		g_TextureData[i].width = width;
 		g_TextureData[i].height = height;
+		g_TextureData[i].id = i;
 		return i;	//“o˜^‚µ‚½êŠiŠÇ—”Ô†‚ð–ß‚·j
 	}
 
@@ -86,4 +88,12 @@ int Texture_GetWidth(int id) {
 
 int Texture_GetHeight(int id) {
 	return g_TextureData[id].height;
+}
+
+int Texture_GetID(const char* pFileName) {
+	for (int i = 0; i < TEXTUREDATA_MAX; i++) {
+		if (!strcmp(g_TextureData[i].filename, pFileName)) {
+			return g_TextureData[i].id;
+		}
+	}
 }

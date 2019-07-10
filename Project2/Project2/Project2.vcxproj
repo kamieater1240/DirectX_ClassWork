@@ -132,21 +132,33 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bullet.cpp" />
+    <ClCompile Include="collsion.cpp" />
     <ClCompile Include="debug_font.cpp" />
+    <ClCompile Include="enemy.cpp" />
+    <ClCompile Include="enemyMaker.cpp" />
+    <ClCompile Include="game.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mydirect3d.cpp" />
+    <ClCompile Include="player.cpp" />
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="SpriteAnim.cpp" />
     <ClCompile Include="system_timer.cpp" />
     <ClCompile Include="texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bullet.h" />
+    <ClInclude Include="collision.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="debug_font.h" />
+    <ClInclude Include="enemy.h" />
+    <ClInclude Include="enemyMaker.h" />
+    <ClInclude Include="game.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="mydirect3d.h" />
+    <ClInclude Include="player.h" />
     <ClInclude Include="sprite.h" />
     <ClInclude Include="SpriteAnim.h" />
     <ClInclude Include="system_timer.h" />

@@ -18,19 +18,14 @@
 #include "sprite.h"
 #include "SpriteAnim.h"
 #include "system_timer.h"
-#include "debug_font.h"
 #include "input.h"
+#include "game.h"
 
 #define CLASS_NAME		"GameWindow"
 #define WINDOW_CAPTION	"ポリゴン描画"
 
-int g_FrameCount = 0;				//フレームカウンター
-int g_FPSBaseFrameCount = 0;		//FPS計測用フレームカウンター
-double g_FPSBaseTime = 0.0;			//FPS計測用時間
-float g_FPS = 0.0;					//FPS
-double g_StaticFrameTime = 0.0;
-
 LPDIRECT3DDEVICE9 myDevice;
+double g_StaticFrameTime = 0.0;
 
 //ポリゴンの頂点データを作る
 Vertex2d v[] = {
@@ -38,13 +33,6 @@ Vertex2d v[] = {
 	{D3DXVECTOR4(512.0f,   0.0f, 0.0f, 1.0f), D3DCOLOR_RGBA(255, 255, 255, 255), D3DXVECTOR2(1.0f, 0.0f)},
 	{D3DXVECTOR4(0.0f, 512.0f, 0.0f, 1.0f), D3DCOLOR_RGBA(255, 255, 255, 255), D3DXVECTOR2(0.0f, 1.0f)},
 	{D3DXVECTOR4(512.0f, 512.0f, 0.0f, 1.0f), D3DCOLOR_RGBA(255, 255, 255, 255), D3DXVECTOR2(1.0f, 1.0f)}
-};
-
-Vertex2d v3[] = {
-	{D3DXVECTOR4(100.0f, 500.0f, 0.0f, 1.0f), D3DCOLOR_RGBA(255, 255, 255, 255), D3DXVECTOR2(0.0f, 0.0f)},
-	{D3DXVECTOR4(300.0f, 500.0f, 0.0f, 1.0f), D3DCOLOR_RGBA(255, 255, 255, 255), D3DXVECTOR2(1.0f, 0.0f)},
-	{D3DXVECTOR4(100.0f, 700.0f, 0.0f, 1.0f), D3DCOLOR_RGBA(255, 255, 255, 255), D3DXVECTOR2(0.0f, 1.0f)},
-	{D3DXVECTOR4(300.0f, 700.0f, 0.0f, 1.0f), D3DCOLOR_RGBA(255, 255, 255, 255), D3DXVECTOR2(1.0f, 1.0f)}
 };
 
 Vertex2d v4[] = {
@@ -63,21 +51,6 @@ Vertex2d circle[CIRCLE_RESOLUTION + 1];
 
 //Star's parameter
 Vertex2d star[12];
-
-//Texture IDs
-int Texture_IDs[100];
-int textureNum;
-
-int alpha;
-float angle = 0.0f;
-
-float nowX = 512.0f, nowY = 256.0f;
-float moveX = 0.0f, moveY = 0.0f;
-float moveSpeed = 14.0f;
-float angleNow = 0.0f;
-float moveAngle = 0.0f;
-float moveAngleSpeed = 2.0f;
-float scaleX = 1.0f, scaleY = 1.0f;
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	UNREFERENCED_PARAMETER(hPrevInstance);
@@ -184,22 +157,8 @@ bool Init(HWND hWnd) {
 
 	MyDirect3D_Init(hWnd);
 	myDevice = MyDirect3D_GetDevice();
-
-	DebugFont_Initialize();
-	SystemTimer_Initialize();
-	SystemTimer_Start();
-	g_FrameCount = g_FPSBaseFrameCount = 0;
-	g_FPSBaseTime = SystemTimer_GetTime();
-	g_FPS = 0.0;
-
-	textureNum = 0;
-	Texture_IDs[textureNum++] = Texture_SetLoadFile("Asset/Texture/kobeni.jpg", 256, 256);
-	Texture_IDs[textureNum++] = Texture_SetLoadFile("Asset/Texture/leoreiya.png", 256, 256);
-	Texture_IDs[textureNum++] = Texture_SetLoadFile("Asset/Texture/spice_and_wolf.jpg", 256, 256);
-	SpriteAnim_Init();
-	Texture_Load();
-
-	alpha = 255;
+	
+	gameInit();
 
 	return true;
 }
@@ -212,60 +171,11 @@ void Uninit(void) {
 
 void Update(void) {
 	drawST();
-	alpha--;
-	if (alpha < 0)
-		alpha = 255;
-
-	angle += 0.02f;
-
-	g_FrameCount++;
-	double time = SystemTimer_GetTime();
-
-	if (time - g_FPSBaseTime >= FPS_MEASUREMENT_TIME) {
-		g_FPS = (float)((g_FrameCount - g_FPSBaseFrameCount) / (time - g_FPSBaseTime));
-		g_FPSBaseTime = time;
-		g_FPSBaseFrameCount = g_FrameCount;
-	}
 
 	SpriteAnim_Update();
 	Keyboard_Update();
 
-	if (Keyboard_IsPress(DIK_W)) {		//Move Up
-		moveY -= moveSpeed;
-	}
-	if (Keyboard_IsPress(DIK_A)) {		//Move Left
-		moveX -= moveSpeed;
-	}
-	if (Keyboard_IsPress(DIK_S)) {		//Move Down
-		moveY += moveSpeed;
-	}
-	if (Keyboard_IsPress(DIK_D)) {		//Move Right
-		moveX += moveSpeed;
-	}
-	if (Keyboard_IsPress(DIK_Q)) {		//Rotate Left
-		moveAngle -= moveAngleSpeed;
-	}
-	if (Keyboard_IsPress(DIK_E)) {		//Rotate Right
-		moveAngle += moveAngleSpeed;
-	}
-	if (Keyboard_IsPress(DIK_Z)) {		//Scale Up
-		scaleX += 0.01f;
-		scaleY += 0.01f;
-	}
-	if (Keyboard_IsPress(DIK_C)) {		//Scale Down
-		scaleX -= 0.01f;
-		scaleY -= 0.01f;
-	}
-
-	//摩擦力
-	moveX *= 0.95f;
-	moveY *= 0.95f;
-	moveAngle *= 0.95f;
-
-	//位置更新
-	nowX += moveX;
-	nowY += moveY;
-	angleNow += moveAngle;
+	gameUpdate();
 }
 
 void Draw(void) {
@@ -278,59 +188,7 @@ void Draw(void) {
 	myDevice->BeginScene();	//BeginScene後一定要接EndScene
 	myDevice->SetFVF(FVF_VERTEX2D);
 
-	//DrawPrimitiveUPの引数　=>　図形の描くタイプ　　数　　頂点データ先頭アドレス　　頂点1個分のサイズ
-
-	Sprite_Draw(0, 256, 256);
-	Sprite_Draw(1, nowX, nowY, nowX, nowY, angleNow, scaleX, scaleY, 1.0f);
-	//Sprite_Draw(2, 768, 256, 0, 0, 64, 64, 768, 256, angle);
-	//Sprite_Draw(0, 256, 512, 100, 100, 100, 100);
-
-	/*myDevice->SetTexture(0, g_pTexture);
-	myDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, v, sizeof(Vertex2d));
-	myDevice->SetTexture(0, NULL);
-
-	myDevice->SetTexture(0, g_pTexture2);
-	myDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, v4, sizeof(Vertex2d));
-	myDevice->SetTexture(0, NULL);*/
-
-	//Texture setting
-	myDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);	//可以控制polygon vertex的alpha值來讓texture變透明
-	myDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	myDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-	//g_pDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG2);	//可以讓texture只顯示polygon color
-
-	//透明を設定できるセッティング
-	myDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	myDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	myDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-
-	for (int i = 0; i < 4; i++) {
-		v3[i].color = D3DCOLOR_RGBA(255, 255, 255, alpha);
-	}
-
-	/*myDevice->SetTexture(0, g_pTexture1);
-	myDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, v3, sizeof(Vertex2d));
-	myDevice->SetTexture(0, NULL);*/
-
-	//SpriteAnim_Draw(900, 500);
-	//--------------------圖片放大縮小時Sampler用法--------------------//
-	/*g_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-	g_pDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
-	g_pDevice->SetSamplerState(0, D3DSAMP_BORDERCOLOR, D3DCOLOR_RGBA(200, 150, 200, 255));*/
-
-	/*g_pDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-	g_pDevice->SetTexture(0, g_pTexture);
-	g_pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, v4, sizeof(Vertex2d));
-	g_pDevice->SetTexture(0, NULL);*/
-
-	//Sampling state ANISOTROPY
-	/*g_pDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC);
-	g_pDevice->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 16);*/
-	//---------------------------------------------------------------//
-
-	//↑↑↑ 要注意是用什麼畫圖方式!!不同方式頂點的安排順序也不一樣!!!
-
-	DebugFont_Draw(32, 32, "%.2f", g_FPS);
+	gameDraw();
 
 	myDevice->EndScene();		//在Call下一個BeginScene之前一定要接EndScene
 	myDevice->Present(NULL, NULL, NULL, NULL);
