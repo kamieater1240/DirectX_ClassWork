@@ -8,7 +8,7 @@ int FrameCount = 0;
 
 void SpriteAnim_Init() {
 
-	Texture_SetLoadFile("Asset/Texture/runningman100_flip.png", 700, 400);
+	Texture_SetLoadFile("Asset/Texture/ship.png", 800, 480);
 	Texture_Load();
 }
 
@@ -22,7 +22,13 @@ void SpriteAnim_Draw(float dx, float dy) {
 
 	int patternX = 4 - (FrameCount / 5 % 5);
 	int patternY = 4 - (FrameCount / 5 / 5);
-	Sprite_Draw(3, dx, dy, patternX * 140, patternY * 200, 140, 200);
+	Sprite_Draw(Texture_GetID("Asset/Texture/ship.png"), dx, dy, patternX * 160, patternY * 240, 160, 240);
+}
+
+void SpriteAnim_Draw(const char* fileName, float dx, float dy, int sprite_width, int sprite_height) {
+	int patternX = FrameCount / 5 % 5;
+	int patternY = FrameCount / 5 / 5;
+	Sprite_Draw(Texture_GetID(fileName), dx, dy, patternX * sprite_width, patternY * sprite_height, sprite_width, sprite_height);
 }
 
 void SpriteAnim_Uninit(){

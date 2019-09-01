@@ -11,6 +11,9 @@
 #include "system_timer.h"
 #include "debug_font.h"
 #include "mydirect3d.h"
+#include "SpriteAnim.h"
+#include "judgement.h"
+#include "explosion.h"
 
 int g_FrameCount;				//フレームカウンター
 int g_FPSBaseFrameCount;		//FPS計測用フレームカウンター
@@ -30,6 +33,7 @@ void gameInit() {
 	bulletInit();
 	enemyMakerInit();
 	enemyInit();
+	explosionInit();
 
 	LPDIRECT3DDEVICE9 myDevice = MyDirect3D_GetDevice();
 	//Texture setting
@@ -59,10 +63,12 @@ void gameUpdate() {
 		g_FPSBaseFrameCount = g_FrameCount;
 	}
 
+	judgementUpdate();
 	playerUpdate();
 	bulletUpdate();
 	enemyMakerUpdate();
 	enemyUpdate();
+	explosionUpdate();
 }
 
 void gameDraw() {
@@ -70,6 +76,7 @@ void gameDraw() {
 	playerDraw();
 	bulletDraw();
 	enemyDraw();
+	explosionDraw();
 
 	DebugFont_Draw(32, 32, "%.2f", g_FPS);
 }

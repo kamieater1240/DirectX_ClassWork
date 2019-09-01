@@ -137,8 +137,10 @@
     <ClCompile Include="debug_font.cpp" />
     <ClCompile Include="enemy.cpp" />
     <ClCompile Include="enemyMaker.cpp" />
+    <ClCompile Include="explosion.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="input.cpp" />
+    <ClCompile Include="judgement.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mydirect3d.cpp" />
     <ClCompile Include="player.cpp" />
@@ -154,8 +156,10 @@
     <ClInclude Include="debug_font.h" />
     <ClInclude Include="enemy.h" />
     <ClInclude Include="enemyMaker.h" />
+    <ClInclude Include="explosion.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="judgement.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="mydirect3d.h" />
     <ClInclude Include="player.h" />
