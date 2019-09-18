@@ -3,12 +3,14 @@
 #include <d3dx9.h>
 #include "player.h"
 #include "main.h"
+#include "bullet.h"
+#include "effect.h"
 #include "sprite.h"
 #include "SpriteAnim.h"
 #include "texture.h"
 #include "mydirect3d.h"
+#include "sound.h"
 #include "input.h"
-#include "bullet.h"
 
 Vertex2d v3[] = {
 	{D3DXVECTOR4(100.0f, 100.0f, 0.0f, 1.0f), D3DCOLOR_RGBA(255, 255, 255, 255), D3DXVECTOR2(0.4f, 0.0f)},
@@ -65,7 +67,13 @@ void playerUpdate() {
 		if (g_player_shootingCD == 0) {
 			CreateBullet(g_player_position.x + 40.0f, g_player_position.y, { 2.0, 0.0 }, BULLET_NORMAL);
 			g_player_shootingCD = 30;
+			PlaySound(SOUND_LABEL_SE_SHOT);
 		}
+	}
+
+	//エフェクト生成, create only when player moves
+	if (dir.x != 0.0f || dir.y != 0.0f) {
+		Effect_Create(g_player_position.x, g_player_position.y, D3DCOLOR_RGBA(255, 60, 60, 255), 120, 0.5f);
 	}
 
 	//位置更新

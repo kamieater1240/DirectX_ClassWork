@@ -7,6 +7,7 @@
 
 //position       color            texture
 #define FVF_VERTEX2D	(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
+#define FVF_FADE_VERTEX (D3DFVF_XYZRHW | D3DFVF_DIFFUSE)
 
 #define FPS_MEASUREMENT_TIME 1.0
 

@@ -3,17 +3,19 @@
 #include <d3dx9.h>
 #include "game.h"
 #include "main.h"
+#include "fade.h"
 #include "player.h"
 #include "bullet.h"
 #include "enemy.h"
 #include "enemyMaker.h"
-#include "input.h"
-#include "system_timer.h"
-#include "debug_font.h"
-#include "mydirect3d.h"
-#include "SpriteAnim.h"
+#include "score.h"
 #include "judgement.h"
 #include "explosion.h"
+#include "effect.h"
+#include "input.h"
+#include "mydirect3d.h"
+#include "system_timer.h"
+#include "debug_font.h"
 
 int g_FrameCount;				//フレームカウンター
 int g_FPSBaseFrameCount;		//FPS計測用フレームカウンター
@@ -34,6 +36,9 @@ void gameInit() {
 	enemyMakerInit();
 	enemyInit();
 	explosionInit();
+	scoreInit();
+	fadeInit();
+	effectInit();
 
 	LPDIRECT3DDEVICE9 myDevice = MyDirect3D_GetDevice();
 	//Texture setting
@@ -69,14 +74,19 @@ void gameUpdate() {
 	enemyMakerUpdate();
 	enemyUpdate();
 	explosionUpdate();
+	fadeUpdate();
+	effectUpdate();
 }
 
 void gameDraw() {
 
 	playerDraw();
+	effectDraw();
 	bulletDraw();
 	enemyDraw();
 	explosionDraw();
+	scoreDraw(getScore(), 640, 250, 7, true, 1);
+	//fadeDraw();
 
 	DebugFont_Draw(32, 32, "%.2f", g_FPS);
 }

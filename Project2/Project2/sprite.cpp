@@ -1,7 +1,4 @@
-﻿#include <Windows.h>
-#include <d3d9.h>
-#include <d3dx9.h>
-#include "sprite.h"
+﻿#include "sprite.h"
 #include "texture.h"
 #include "mydirect3d.h"
 #include "main.h"
@@ -63,6 +60,43 @@ void Sprite_Draw(int textureID, float dx, float dy) {
 	pDevice->SetFVF(FVF_VERTEX2D);
 	pDevice->SetTexture(0, Texture_GetTexture(textureID));
 	pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 4, 0, 2);
+	pDevice->SetTexture(0, NULL);
+}
+
+//No Cut, Scaling Method
+void Sprite_Draw(int textureID, float dx, float dy, float scaleX, float scaleY, float scaleZ) {
+	int width = Texture_GetWidth(textureID);
+	int height = Texture_GetHeight(textureID);
+
+	Vertex2d v[] = {
+		{D3DXVECTOR4(dx - width / 2, dy - height / 2, 0.0f, 1.0f), g_Color, D3DXVECTOR2(0.0f, 0.0f)},
+		{D3DXVECTOR4(dx + width / 2, dy - height / 2, 0.0f, 1.0f), g_Color, D3DXVECTOR2(1.0f, 0.0f)},
+		{D3DXVECTOR4(dx - width / 2, dy + height / 2, 0.0f, 1.0f), g_Color, D3DXVECTOR2(0.0f, 1.0f)},
+		{D3DXVECTOR4(dx + width / 2, dy + height / 2, 0.0f, 1.0f), g_Color, D3DXVECTOR2(1.0f, 1.0f)},
+	};
+
+	LPDIRECT3DDEVICE9 pDevice = MyDirect3D_GetDevice();
+
+	//変数宣言
+	D3DXMATRIX mtxS, mtxT, mtxIT, mtxW;
+	//変数に関数を使用して値を代入する
+	D3DXMatrixScaling(&mtxS, scaleX, scaleY, scaleZ);
+
+	//平移矩陣
+	D3DXMatrixTranslation(&mtxT, -dx, -dy, 0.0f);
+	D3DXMatrixTranslation(&mtxIT, dx, dy, 0.0f);
+
+	mtxW = mtxT * mtxS * mtxIT;
+	//座標変換する
+	//D3DXVec4Transform(&v[0].position, &v[0].position, &mtrxR);
+	//					出力				入力
+	for (int i = 0; i < 4; i++) {
+		D3DXVec4Transform(&v[i].position, &v[i].position, &mtxW);
+	}
+
+	pDevice->SetFVF(FVF_VERTEX2D);
+	pDevice->SetTexture(0, Texture_GetTexture(textureID));
+	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, v, sizeof(Vertex2d));
 	pDevice->SetTexture(0, NULL);
 }
 
@@ -168,4 +202,8 @@ void Sprite_Draw(int textureID, float dx, float dy, int cut_x, int cut_y, int cu
 	pDevice->SetTexture(0, Texture_GetTexture(textureID));
 	pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, v, sizeof(Vertex2d));
 	pDevice->SetTexture(0, NULL);
+}
+
+void Sprite_SetColor(D3DCOLOR color) {
+	g_Color = color;
 }
