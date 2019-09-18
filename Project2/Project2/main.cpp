@@ -20,6 +20,7 @@
 #include "system_timer.h"
 #include "input.h"
 #include "game.h"
+#include "sound.h"
 
 #define CLASS_NAME		"GameWindow"
 #define WINDOW_CAPTION	"ポリゴン描画"
@@ -158,6 +159,8 @@ bool Init(HWND hWnd) {
 	MyDirect3D_Init(hWnd);
 	myDevice = MyDirect3D_GetDevice();
 	
+	InitSound(hWnd);
+
 	gameInit();
 
 	return true;
